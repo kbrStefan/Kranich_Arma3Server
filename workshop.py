@@ -15,27 +15,28 @@ def download(mods):
             yield lst[i:i + n]
 
     def recursive_lowercase(path):
-        # Walk from bottom up to avoid renaming parent before children
-        for root, dirs, files in os.walk(path, topdown=False):
-            for name in files:
-                old = os.path.join(root, name)
-                new = os.path.join(root, name.lower())
-                if old != new:
-                    os.rename(old, new)
-            for name in dirs:
-                old = os.path.join(root, name)
-                new = os.path.join(root, name.lower())
-                if old != new:
-                    os.rename(old, new)
-        # Finally, rename the root folder itself
-        parent = os.path.dirname(path)
-        new_path = os.path.join(parent, os.path.basename(path).lower())
-        if path != new_path:
-            os.rename(path, new_path)
-        return new_path
+        # Only process 'addons' and 'keys' subfolders
+        for subfolder in ['addons', 'keys']:
+            target_dir = os.path.join(path, subfolder)
+            if os.path.isdir(target_dir):
+                for root, dirs, files in os.walk(target_dir, topdown=False):
+                    for name in files:
+                        old = os.path.join(root, name)
+                        new = os.path.join(root, name.lower())
+                        if old != new:
+                            os.rename(old, new)
+                    for name in dirs:
+                        old = os.path.join(root, name)
+                        new = os.path.join(root, name.lower())
+                        if old != new:
+                            os.rename(old, new)
+        return path
 
-    for mod_group in chunks(mods, 3):
+    #sort the mods list to ensure consistent order
+    mods.sort()
+    for mod_group in chunks(mods, 5):
         retries = 3
+        print(f"\033[34mDownloading mods {mod_group}\033[0m", flush=True)
         while retries > 0:
             steamcmd = ["/steamcmd/steamcmd.sh"]
             steamcmd.extend(["+force_install_dir", "/arma3"])
