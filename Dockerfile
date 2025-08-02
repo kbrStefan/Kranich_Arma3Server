@@ -78,4 +78,4 @@ STOPSIGNAL SIGINT
 
 COPY --chown=arma:arma *.py /
 
-CMD ["python3","/launch.py"]
+CMD ["python3", "-u", "/launch.py"]

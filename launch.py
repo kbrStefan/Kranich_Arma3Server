@@ -3,6 +3,7 @@ import re
 import shutil
 import subprocess
 from string import Template
+from time import sleep
 
 import local
 import workshop
@@ -19,6 +20,11 @@ def env_defined(key):
 CONFIG_FILE = os.environ["ARMA_CONFIG"]
 KEYS = "/arma3/keys"
 
+print("\033[30;47m>>>> Starting Arma3 server launcher <<\033[0m", flush=True)
+print(" Using config file:", CONFIG_FILE, flush=True)
+print("---------------------------------------------", flush=True)
+
+
 if env_defined("CLEAR_KEYS") and os.environ["CLEAR_KEYS"] == "true" and os.path.isdir(KEYS):
     shutil.rmtree(KEYS)
 if not os.path.isdir(KEYS):
@@ -28,7 +34,7 @@ if not os.path.isdir(KEYS):
 
 if os.environ["SKIP_INSTALL"] in ["", "false"]:
     # Install Arma
-
+    print("Installing Arma3...", flush=True)
     steamcmd = ["/steamcmd/steamcmd.sh"]
     steamcmd.extend(["+force_install_dir", "/arma3"])
     steamcmd.extend(["+login", os.environ["STEAM_USER"], os.environ["STEAM_PASSWORD"]])
@@ -49,6 +55,8 @@ if os.environ["SKIP_INSTALL"] in ["", "false"]:
             )
     steamcmd.extend(["+quit"])
     subprocess.call(steamcmd)
+else:
+    print("Skipping Arma3 installation as SKIP_INSTALL is set to true.", flush=True)
 
 if env_defined("STEAM_ADDITIONAL_DEPOT"):
     for depot in os.environ["STEAM_ADDITIONAL_DEPOT"].split("|"):
@@ -58,17 +66,21 @@ if env_defined("STEAM_ADDITIONAL_DEPOT"):
         )
         for file in os.listdir(depot_dir):
             shutil.copytree(depot_dir + file, "/arma3/", dirs_exist_ok=True)
-            print(f"Moved {file} to /arma3")
+            print(f"Moved {file} to /arma3", flush=True)
 
 # Mods
 
 mods = []
 
 if os.environ["MODS_PRESET"] != "":
+    print("Loading mods from preset:", os.environ["MODS_PRESET"], flush=True)
     mods.extend(workshop.preset(os.environ["MODS_PRESET"]))
 
 if os.environ["MODS_LOCAL"] == "true" and os.path.exists("mods"):
+    print("Loading local mods from 'mods' directory", flush=True)
     mods.extend(local.mods("mods"))
+
+print("\033[30;47mPreparing for lauch with mods:\033[0m", mods, flush=True)
 
 launch = "{} -limitFPS={} -world={} {} {}".format(
     os.environ["ARMA_BINARY"],
@@ -83,9 +95,10 @@ if os.environ["ARMA_CDLC"] != "":
         launch += " -mod={}".format(cdlc)
 
 clients = int(os.environ["HEADLESS_CLIENTS"])
-print("Headless Clients:", clients)
+print("Headless Clients:", clients, flush=True)
 
 if clients != 0:
+    print("Using headless clients profile:", os.environ["HEADLESS_CLIENTS_PROFILE"], flush=True)
     with open("/arma3/configs/{}".format(CONFIG_FILE)) as config:
         data = config.read()
         regex = r"(.+?)(?:\s+)?=(?:\s+)?(.+?)(?:$|\/|;)"
@@ -119,7 +132,7 @@ if clients != 0:
         )
 
         hc_launch = client_launch + ' -name="{}"'.format(hc_name)
-        print("LAUNCHING ARMA CLIENT {} WITH".format(i), hc_launch)
+        print("LAUNCHING ARMA CLIENT {} WITH".format(i), hc_launch, flush=True)
         subprocess.Popen(hc_launch, shell=True)
 
 else:
@@ -132,5 +145,5 @@ launch += ' -port={} -name="{}" -profiles="/arma3/configs/profiles"'.format(
 if os.path.exists("servermods"):
     launch += mod_param("serverMod", local.mods("servermods"))
 
-print("LAUNCHING ARMA SERVER WITH", launch, flush=True)
+print("\033[30;47mLAUNCHING ARMA SERVER WITH\033[0m", launch, flush=True)
 os.system(launch)
