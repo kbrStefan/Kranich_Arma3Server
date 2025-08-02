@@ -1,0 +1,12 @@
+[Unit]
+Description=Manual Arma 3 Server
+After=network.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+User=arma
+Group=arma
+SupplementaryGroups=docker
+ExecStart=/home/arma/Kranich_Arma3Server/run_arma_server.sh start
+ExecStop=/home/arma/Kranich_Arma3Server/run_arma_server.sh stop
