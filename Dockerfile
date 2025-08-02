@@ -1,4 +1,4 @@
-FROM debian:bullseye-slim
+FROM debian:trixie-slim
 
 LABEL maintainer="Brett - github.com/brettmayson"
 LABEL org.opencontainers.image.source=https://github.com/brettmayson/arma3server
@@ -15,6 +15,7 @@ RUN apt-get update \
         ca-certificates \
         curl \
         libstdc++6 \
+        util-linux \
     && \
     apt-get remove --purge -y \
     && \
@@ -22,11 +23,12 @@ RUN apt-get update \
     && \
     apt-get autoremove -y \
     && \
-    rm -rf /var/lib/apt/lists/* \
-    && \
-    mkdir -p /steamcmd \
-    && \
-    wget -qO- 'https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz' | tar zxf - -C /steamcmd
+    rm -rf /var/lib/apt/lists/*
+
+ARG UID=1000
+ARG GID=1000
+RUN groupadd -g $GID arma \
+    && useradd -m -u $UID -g $GID -d /home/arma -s /bin/bash arma
 
 ENV ARMA_BINARY=./arma3server
 ENV ARMA_CONFIG=main.cfg
@@ -51,7 +53,16 @@ EXPOSE 2304/udp
 EXPOSE 2305/udp
 EXPOSE 2306/udp
 
+RUN mkdir -p /steamcmd \
+    && wget -qO- 'https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz' | tar zxf - -C /steamcmd
+#      curl -sqL "https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz" | tar zxvf -
 WORKDIR /arma3
+
+RUN chown -R arma:arma /steamcmd \
+    && mkdir -p /arma3/steamapps/workshop/content \
+    && chown -R arma:arma /arma3
+
+USER arma
 
 VOLUME /steamcmd
 VOLUME /arma3/addons
@@ -61,9 +72,10 @@ VOLUME /arma3/jets
 VOLUME /arma3/heli
 VOLUME /arma3/orange
 VOLUME /arma3/argo
+VOLUME /arma3/steamapps/workshop/content/107410
 
 STOPSIGNAL SIGINT
 
-COPY *.py /
+COPY --chown=arma:arma *.py /
 
 CMD ["python3","/launch.py"]

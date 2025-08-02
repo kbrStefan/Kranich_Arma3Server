@@ -1,8 +1,11 @@
-version: '3.8'
+version: '3.9'
 services:
   arma3:
-    build: .
-    image: ghcr.io/brettmayson/arma3server/arma3server:latest
+    build:
+      context: .
+      args:
+        UID: ${MY_UID}
+        GID: ${MY_GID}
     platform: linux/amd64
     container_name: arma3
     network_mode: host
@@ -19,6 +22,7 @@ services:
       - 'jets:/arma3/jets'
       - 'orange:/arma3/orange'
       - 'steamcmd:/steamcmd'
+      - './steamapp:/arma3/steamapps/workshop/content/107410'
     env_file: .env
     restart: unless-stopped
 volumes:
