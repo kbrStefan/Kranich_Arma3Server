@@ -54,7 +54,7 @@ def download(mods):
                 print(f"\033[32mSuccessfully downloaded mods {mod_group}\033[0m", flush=True)
                 break
             else:
-                print(f"\033[33mDownload failed for mods {mod_group}, retries left: {retries-1}\033[0m", flush=True)
+                print(f"\033[38;5;208mDownload failed for mods {mod_group}, retries left: {retries-1}\033[0m", flush=True)
                 retries -= 1
         if retries == 0:
             raise RuntimeError(f"\033[31mFailed to download mods {mod_group} after 3 attempts.\033[0m")

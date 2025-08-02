@@ -2,6 +2,15 @@
 
 An Arma 3 Dedicated Server. Updates to the latest version every time it is restarted.
 
+Custom modification:
+- update the dockerfile to use `debian:trixie-slim`
+- docker compose builds local image instead of downloading from `ghcr.io`
+- default container user is now non-root `arma` instead of `root`
+- volume for workshop downloads added
+- added (template) systemd service and companion `run_arma_server.sh` to run the container as non root, non docker user.
+- workshop mods are loaded batches of 3 to improve stability
+- downloaded folders are auto conveted to lower-case before installation of keys
+
 ## Usage
 
 ### Docker CLI
