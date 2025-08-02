@@ -41,7 +41,7 @@ def download(mods):
     #sort the mods list to ensure consistent order
     mods.sort()
     for mod_group in chunks(mods, len(mods)):
-        retries = 1
+        retries = 3
         print(f"\033[34mDownloading mods {mod_group}\033[0m", flush=True)
         while retries > 0:
             steamcmd = ["/steamcmd/steamcmd.sh"]

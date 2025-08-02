@@ -34,7 +34,7 @@ if not os.path.isdir(KEYS):
 
 if os.environ["SKIP_INSTALL"] in ["", "false"]:
     # Install Arma
-    print("Installing Arma3...", flush=True)
+    print("\033[30;47mInstalling Arma3...\033[0m", flush=True)
     steamcmd = ["/steamcmd/steamcmd.sh"]
     steamcmd.extend(["+force_install_dir", "/arma3"])
     steamcmd.extend(["+login", os.environ["STEAM_USER"], os.environ["STEAM_PASSWORD"]])
@@ -54,7 +54,17 @@ if os.environ["SKIP_INSTALL"] in ["", "false"]:
                 ["+download_depot", "233780", depot_parts[0], depot_parts[1]]
             )
     steamcmd.extend(["+quit"])
-    subprocess.call(steamcmd)
+
+    retries = 5
+    while retries > 0:
+        result = subprocess.call(steamcmd)
+        if result != 0:
+            retries -= 1
+            print(f"\033[31mArma3 installation failed with exit code {result}. Retrying ({retries})...\033[0m", flush=True)
+            sleep(5)
+        else:
+            print("\033[32mArma3 installation completed successfully.\033[0m", flush=True)
+            break
 else:
     print("Skipping Arma3 installation as SKIP_INSTALL is set to true.", flush=True)
 
