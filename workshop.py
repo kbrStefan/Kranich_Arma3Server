@@ -10,13 +10,27 @@ USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 
 
 
 def download(mods):
-    steamcmd = ["/steamcmd/steamcmd.sh"]
-    steamcmd.extend(["+force_install_dir", "/arma3"])
-    steamcmd.extend(["+login", os.environ["STEAM_USER"], os.environ["STEAM_PASSWORD"]])
-    for id in mods:
-        steamcmd.extend(["+workshop_download_item", "107410", id])
-    steamcmd.extend(["+quit"])
-    subprocess.call(steamcmd)
+    def chunks(lst, n):
+        for i in range(0, len(lst), n):
+            yield lst[i:i + n]
+
+    for mod_group in chunks(mods, 3):
+        retries = 3
+        while retries > 0:
+            steamcmd = ["/steamcmd/steamcmd.sh"]
+            steamcmd.extend(["+force_install_dir", "/arma3"])
+            steamcmd.extend(["+login", os.environ["STEAM_USER"], os.environ["STEAM_PASSWORD"]])
+            for id in mod_group:
+                steamcmd.extend(["+workshop_download_item", "107410", id])
+            steamcmd.extend(["+quit"])
+            result = subprocess.call(steamcmd)
+            if result == 0:
+                break
+            else:
+                print(f"Download failed for mods {mod_group}, retries left: {retries-1}")
+                retries -= 1
+        if retries == 0:
+            raise RuntimeError(f"Failed to download mods {mod_group} after 3 attempts.")
 
 
 def preset(mod_file):
