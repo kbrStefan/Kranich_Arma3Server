@@ -6,8 +6,11 @@ export MY_GID=$(id -g)
 echo "entering kranich folder"
 cd "$(dirname "$0")"
 
+
 case "$1" in
   start)
+    echo "Pulling latest changes from repository..."
+    git pull
     echo "Starting container..."
     docker compose up --build -d
     ;;

@@ -34,7 +34,7 @@ def download(mods):
             os.rename(path, new_path)
         return new_path
 
-    for mod_group in chunks(mods, 1):
+    for mod_group in chunks(mods, 3):
         retries = 3
         while retries > 0:
             steamcmd = ["/steamcmd/steamcmd.sh"]
