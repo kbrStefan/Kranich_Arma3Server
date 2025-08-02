@@ -32,10 +32,16 @@ def download(mods):
                             os.rename(old, new)
         return path
 
+    print(f"Number of mods entries: {len(mods)}", flush=True)
+    existing_mods = [
+        name for name in os.listdir(os.path.join("/arma3", WORKSHOP))
+        if os.path.isdir(os.path.join("/arma3", WORKSHOP, name))
+    ]
+    print(f"Number of existing subfolders in /arma3/{WORKSHOP}: {len(existing_mods)}", flush=True)
     #sort the mods list to ensure consistent order
     mods.sort()
-    for mod_group in chunks(mods, 5):
-        retries = 3
+    for mod_group in chunks(mods, len(mods)):
+        retries = 1
         print(f"\033[34mDownloading mods {mod_group}\033[0m", flush=True)
         while retries > 0:
             steamcmd = ["/steamcmd/steamcmd.sh"]
@@ -58,7 +64,8 @@ def download(mods):
                 print(f"\033[38;5;208mDownload failed for mods {mod_group}, retries left: {retries-1}\033[0m", flush=True)
                 retries -= 1
         if retries == 0:
-            raise RuntimeError(f"\033[31mFailed to download mods {mod_group} after 3 attempts.\033[0m")
+            #raise RuntimeError(f"\033[31mFailed to download mods {mod_group} after 3 attempts.\033[0m")
+            print(f"\033[31mFailed to download mods {mod_group}... scipping for now\033[0m", flush=True)
 
 
 def preset(mod_file):

@@ -16,7 +16,7 @@ case "$1" in
     ;;
   stop)
     echo "Stopping container..."
-    docker compose down
+    docker compose stop
     ;;
   *)
     echo "Usage: $0 {start|stop}"
