@@ -4,8 +4,7 @@ services:
     build:
       context: .
       args:
-        UID: ${MY_UID}
-        GID: ${MY_GID}
+        PUID: ${MY_UID}
     platform: linux/amd64
     container_name: arma3
     network_mode: host
@@ -14,23 +13,13 @@ services:
       - './configs:/arma3/configs'
       - './mods:/arma3/mods'
       - './servermods:/arma3/servermods'
-      - 'addons:/arma3/addons'
-      - 'argo:/arma3/argo'
-      - 'enoch:/arma3/enoch'
-      - 'expansion:/arma3/expansion'
-      - 'heli:/arma3/heli'
-      - 'jets:/arma3/jets'
-      - 'orange:/arma3/orange'
-      - 'steamcmd:/steamcmd'
+      - './addons:/arma3/addons'
+      - './argo:/arma3/argo'
+      - './enoch:/arma3/enoch'
+      - './expansion:/arma3/expansion'
+      - './heli:/arma3/heli'
+      - './jets:/arma3/jets'
+      - './orange:/arma3/orange'
       - './steamapp:/arma3/steamapps/workshop/content/107410'
     env_file: .env
     restart: unless-stopped
-volumes:
-  addons:
-  argo:
-  enoch:
-  expansion:
-  heli:
-  jets:
-  orange:
-  steamcmd:

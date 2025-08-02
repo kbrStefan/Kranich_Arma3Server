@@ -18,10 +18,12 @@ def env_defined(key):
 
 
 CONFIG_FILE = os.environ["ARMA_CONFIG"]
+STEAMCMDDIR = os.environ.get("STEAMCMDDIR")
 KEYS = "/arma3/keys"
 
 print("\033[30;47m>>>> Starting Arma3 server launcher <<\033[0m", flush=True)
 print(" Using config file:", CONFIG_FILE, flush=True)
+print(" STEAMCMDDIR:", STEAMCMDDIR, flush=True)
 print("---------------------------------------------", flush=True)
 
 
@@ -35,16 +37,19 @@ if not os.path.isdir(KEYS):
 if os.environ["SKIP_INSTALL"] in ["", "false"]:
     # Install Arma
     print("\033[30;47mInstalling Arma3...\033[0m", flush=True)
-    steamcmd = ["/steamcmd/steamcmd.sh"]
+    steamcmd = [STEAMCMDDIR+"/steamcmd.sh"]
     steamcmd.extend(["+force_install_dir", "/arma3"])
     steamcmd.extend(["+login", os.environ["STEAM_USER"], os.environ["STEAM_PASSWORD"]])
     steamcmd.extend(["+app_update", "233780"])
     if env_defined("STEAM_BRANCH"):
+        print(f"Using Steam branch: {os.environ['STEAM_BRANCH']}", flush=True)
         steamcmd.extend(["-beta", os.environ["STEAM_BRANCH"]])
     if env_defined("STEAM_BRANCH_PASSWORD"):
+        print(f"Using Steam branch password: {os.environ['STEAM_BRANCH_PASSWORD']}", flush=True)
         steamcmd.extend(["-betapassword", os.environ["STEAM_BRANCH_PASSWORD"]])
     steamcmd.extend(["validate"])
     if env_defined("STEAM_ADDITIONAL_DEPOT"):
+        print("Downloading additional depots:", os.environ["STEAM_ADDITIONAL_DEPOT"], flush=True)
         for depot in os.environ["STEAM_ADDITIONAL_DEPOT"].split("|"):
             depot_parts = depot.split(",")
             steamcmd.extend(
@@ -55,6 +60,7 @@ if os.environ["SKIP_INSTALL"] in ["", "false"]:
             )
     steamcmd.extend(["+quit"])
 
+    print("\033[34mRunning command:\033[0m", " ".join(steamcmd), flush=True)
     retries = 5
     while retries > 0:
         result = subprocess.call(steamcmd)
@@ -72,7 +78,7 @@ if env_defined("STEAM_ADDITIONAL_DEPOT"):
     for depot in os.environ["STEAM_ADDITIONAL_DEPOT"].split("|"):
         depot_parts = depot.split(",")
         depot_dir = (
-            f"/steamcmd/linux32/steamapps/content/app_233780/depot_{depot_parts[0]}/"
+            f"{STEAMCMDDIR}/linux32/steamapps/content/app_233780/depot_{depot_parts[0]}/"
         )
         for file in os.listdir(depot_dir):
             shutil.copytree(depot_dir + file, "/arma3/", dirs_exist_ok=True)

@@ -1,7 +1,6 @@
 #!/bin/bash
 
 export MY_UID=$(id -u)
-export MY_GID=$(id -g)
 
 echo "entering kranich folder"
 cd "$(dirname "$0")"

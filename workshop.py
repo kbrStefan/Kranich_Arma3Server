@@ -9,6 +9,8 @@ WORKSHOP = "steamapps/workshop/content/107410/"
 #USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36"  # noqa: E501
 USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
 
+STEAMCMDDIR = os.environ.get("STEAMCMDDIR")
+
 def download(mods):
     def chunks(lst, n):
         for i in range(0, len(lst), n):
@@ -44,7 +46,7 @@ def download(mods):
         retries = 3
         print(f"\033[34mDownloading mods {mod_group}\033[0m", flush=True)
         while retries > 0:
-            steamcmd = ["/steamcmd/steamcmd.sh"]
+            steamcmd = [STEAMCMDDIR+"/steamcmd.sh"]
             steamcmd.extend(["+force_install_dir", "/arma3"])
             steamcmd.extend(["+login", os.environ["STEAM_USER"], os.environ["STEAM_PASSWORD"]])
             for id in mod_group:

@@ -1,34 +1,50 @@
-FROM debian:trixie-slim
+FROM debian:bookworm-slim as build_stage
 
-LABEL maintainer="Brett - github.com/brettmayson"
-LABEL org.opencontainers.image.source=https://github.com/brettmayson/arma3server
+LABEL maintainer="walentinlamonos@gmail.com"
+ARG PUID=1000
 
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-RUN apt-get update \
-    && \
-    apt-get install -y --no-install-recommends --no-install-suggests \
+ENV USER steam
+ENV HOMEDIR "/home/${USER}"
+ENV STEAMCMDDIR "${HOMEDIR}/steamcmd"
+
+RUN set -x \
+	# Install, update & upgrade packages
+	&& apt-get update \
+	&& apt-get install -y --no-install-recommends --no-install-suggests \
+		lib32stdc++6=12.2.0-14+deb12u1 \
+		lib32gcc-s1=12.2.0-14+deb12u1 \
+		ca-certificates=20230311 \
+		nano=7.2-1+deb12u1 \
+		curl=7.88.1-10+deb12u12 \
+		locales=2.36-9+deb12u10 \
         python3 \
-        lib32stdc++6 \
-        lib32gcc-s1 \
-        libcurl4 \
-        wget \
-        ca-certificates \
-        curl \
-        libstdc++6 \
-        util-linux \
-    && \
-    apt-get remove --purge -y \
-    && \
-    apt-get clean autoclean \
-    && \
-    apt-get autoremove -y \
-    && \
-    rm -rf /var/lib/apt/lists/*
+	&& sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen \
+	&& dpkg-reconfigure --frontend=noninteractive locales \
+	# Create unprivileged user
+	&& useradd -u "${PUID}" -m "${USER}" \
+	# Download SteamCMD, execute as user
+	&& su "${USER}" -c \
+		"mkdir -p \"${STEAMCMDDIR}\" \
+                && curl -fsSL 'https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz' | tar xvzf - -C \"${STEAMCMDDIR}\" \
+                && \"./${STEAMCMDDIR}/steamcmd.sh\" +quit \
+                && ln -s \"${STEAMCMDDIR}/linux32/steamclient.so\" \"${STEAMCMDDIR}/steamservice.so\" \
+                && mkdir -p \"${HOMEDIR}/.steam/sdk32\" \
+                && ln -s \"${STEAMCMDDIR}/linux32/steamclient.so\" \"${HOMEDIR}/.steam/sdk32/steamclient.so\" \
+                && ln -s \"${STEAMCMDDIR}/linux32/steamcmd\" \"${STEAMCMDDIR}/linux32/steam\" \
+                && mkdir -p \"${HOMEDIR}/.steam/sdk64\" \
+                && ln -s \"${STEAMCMDDIR}/linux64/steamclient.so\" \"${HOMEDIR}/.steam/sdk64/steamclient.so\" \
+                && ln -s \"${STEAMCMDDIR}/linux64/steamcmd\" \"${STEAMCMDDIR}/linux64/steam\" \
+                && ln -s \"${STEAMCMDDIR}/steamcmd.sh\" \"${STEAMCMDDIR}/steam.sh\"" \
+	# Symlink steamclient.so; So misconfigured dedicated servers can find it
+ 	&& ln -s "${STEAMCMDDIR}/linux64/steamclient.so" "/usr/lib/x86_64-linux-gnu/steamclient.so" \
+	&& rm -rf /var/lib/apt/lists/*
 
-ARG UID=1000
-ARG GID=1000
-RUN groupadd -g $GID arma \
-    && useradd -m -u $UID -g $GID -d /home/arma -s /bin/bash arma
+FROM build_stage AS bookworm-root
+WORKDIR ${STEAMCMDDIR}
+
+FROM bookworm-root AS bookworm
+# Switch to user
+USER ${USER}
 
 ENV ARMA_BINARY=./arma3server
 ENV ARMA_CONFIG=main.cfg
@@ -53,29 +69,19 @@ EXPOSE 2304/udp
 EXPOSE 2305/udp
 EXPOSE 2306/udp
 
-RUN mkdir -p /steamcmd \
-    && wget -qO- 'https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz' | tar zxf - -C /steamcmd
-#      curl -sqL "https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz" | tar zxvf -
 WORKDIR /arma3
+RUN mkdir -p /arma3/steamapps/workshop/content/107410
 
-RUN chown -R arma:arma /steamcmd \
-    && mkdir -p /arma3/steamapps/workshop/content \
-    && chown -R arma:arma /arma3
-
-USER arma
-
-VOLUME /steamcmd
-VOLUME /arma3/addons
-VOLUME /arma3/enoch
-VOLUME /arma3/expansion
-VOLUME /arma3/jets
-VOLUME /arma3/heli
-VOLUME /arma3/orange
-VOLUME /arma3/argo
-VOLUME /arma3/steamapps/workshop/content/107410
+#VOLUME /arma3/addons
+#VOLUME /arma3/enoch
+#VOLUME /arma3/expansion
+#VOLUME /arma3/jets
+#VOLUME /arma3/heli
+#VOLUME /arma3/orange
+#VOLUME /arma3/argo
 
 STOPSIGNAL SIGINT
 
-COPY --chown=arma:arma *.py /
+COPY --chown=${USER}:${USER} *.py /
 
 CMD ["python3", "-u", "/launch.py"]
