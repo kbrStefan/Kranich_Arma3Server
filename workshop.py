@@ -42,7 +42,7 @@ def download(mods):
     print(f"Number of existing subfolders in /arma3/{WORKSHOP}: {len(existing_mods)}", flush=True)
     #sort the mods list to ensure consistent order
     mods.sort()
-    for mod_group in chunks(mods, len(mods)):
+    for mod_group in chunks(mods, 10):
         retries = 3
         print(f"\033[34mDownloading mods {mod_group}\033[0m", flush=True)
         while retries > 0:

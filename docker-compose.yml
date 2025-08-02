@@ -6,7 +6,7 @@ services:
       args:
         PUID: ${MY_UID}
     platform: linux/amd64
-    container_name: arma3
+    container_name: arma3_kranich
     network_mode: host
     volumes:
       - './missions:/arma3/mpmissions'
