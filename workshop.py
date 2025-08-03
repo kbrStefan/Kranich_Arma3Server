@@ -2,8 +2,11 @@ import os
 import re
 import subprocess
 import urllib.request
+from time import sleep
 
 import keys
+import shutil
+import glob
 
 WORKSHOP = "steamapps/workshop/content/107410/"
 #USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.47 Safari/537.36"  # noqa: E501
@@ -45,7 +48,11 @@ def download(mods):
     print(f"Number of existing subfolders in /arma3/{WORKSHOP}: {len(existing_mods)}", flush=True)
     #sort the mods list to ensure consistent order
     mods.sort()
-    for mod_group in chunks(mods, 10):
+    if os.environ["SKIP_WORKSHOP_UPDATES"] in ["", "false"]:
+        chunk_size = 10
+    else:
+        chunk_size = 1
+    for mod_group in chunks(mods, chunk_size):
         retries = 3
         print(f"\033[34mDownloading mods {mod_group}\033[0m", flush=True)
         while retries > 0:
@@ -62,10 +69,31 @@ def download(mods):
             else:
                 print(f"\033[38;5;208mDownload failed for mods {mod_group}, retries left: {retries-1}\033[0m", flush=True)
                 retries -= 1
+                sleep(30)  # Wait before retrying
         if retries == 0:
             #raise RuntimeError(f"\033[31mFailed to download mods {mod_group} after 3 attempts.\033[0m")
             print(f"\033[31mFailed to download mods {mod_group}... scipping for now\033[0m", flush=True)
 
+
+def get_client_side_mods(moddirs):
+    client_mods = []
+    for moddir in moddirs:
+        pbos = glob.glob(os.path.join(moddir, "**", "*.pbo"), recursive=True)
+        bikeys = glob.glob(os.path.join(moddir, "**", "*.bikey"), recursive=True)
+        if pbos and not bikeys:
+            client_mods.append(os.path.basename(moddir))
+    print(f"Found {len(client_mods)} client-side mods: {client_mods}", flush=True)
+    return client_mods
+
+def get_missing_mods(mods, moddirs):
+    missing_mods = [
+        mod for mod in mods
+        if not os.path.isdir(os.path.join("/arma3", WORKSHOP, mod))
+        or not os.listdir(os.path.join("/arma3", WORKSHOP, mod))
+    ]
+    missing_mods.extend(keys.get_missing_keys(moddirs))
+    print(f"Found {len(missing_mods)} missing mods: {missing_mods}", flush=True)
+    return missing_mods
 
 def preset(mod_file):
     if mod_file.startswith("http"):
@@ -87,15 +115,27 @@ def preset(mod_file):
             mods.append(match.group(1))
             moddir = WORKSHOP + match.group(1)
             moddirs.append(moddir)
-        if os.environ["SKIP_DOWNLOAD_WORKSHOP"] in ["", "false"]:
+        print(f"Found {len(mods)} mods in preset file: {mod_file}", flush=True)
+        if os.environ["SKIP_WORKSHOP_UPDATES"] in ["", "false"]:
             print(f"Downloading mods: {mods}", flush=True)
             download(mods)
         else:
-            print(f"Skipping download of mods: {mods}", flush=True)
+            missing_mods = get_missing_mods(mods, moddirs)
+            clientside_mods= get_client_side_mods(moddirs)
+            if missing_mods:
+                missing_mods = list(set(missing_mods))
+                missing_mods = [mod for mod in missing_mods if mod not in clientside_mods]
+                skipped_mods = [mod for mod in mods if mod not in missing_mods]
+                print(f"\033[33mForced download of {len(missing_mods)} missing / broken mods: {missing_mods}\033[0m", flush=True)
+                print(f"\033[92mSkipping download of {len(skipped_mods)}mods: {skipped_mods}\033[0m", flush=True)
+                download(missing_mods)
         # After successful download, recursively lowercase all files and folders
         # and copy keys
         for moddir in moddirs:
             new_mod_path = recursive_lowercase(moddir)
             print(f"Recursively lowercased {moddir} to {new_mod_path}", flush=True)
             keys.copy(moddir)
+        # Strip all clientside mods from the load list
+        moddirs = [moddir for moddir in moddirs if os.path.basename(moddir) not in clientside_mods]
+    print(f"Returning {len(moddirs)} mods", flush=True)
     return moddirs
