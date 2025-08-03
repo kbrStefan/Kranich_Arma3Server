@@ -162,4 +162,6 @@ if os.path.exists("servermods"):
     launch += mod_param("serverMod", local.mods("servermods"))
 
 print("\033[30;47mLAUNCHING ARMA SERVER WITH\033[0m", launch, flush=True)
+#while True:
+#    sleep(1)
 os.system(launch)

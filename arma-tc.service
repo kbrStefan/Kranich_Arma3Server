@@ -1,0 +1,12 @@
+[Unit]
+Description=Arma 3 Docker Container Bandwidth Limiter
+After=network.target docker.service
+
+[Service]
+Type=simple
+ExecStart=/home/arma/Kranich_Arma3Server/arma-tc.sh
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

@@ -7,7 +7,13 @@ services:
         PUID: ${MY_UID}
     platform: linux/amd64
     container_name: arma3_kranich
-    network_mode: host
+    #network_mode: host
+    ports:
+      - "2302:2302/udp"
+      - "2303:2303/udp"
+      - "2304:2304/udp"
+      - "2305:2305/udp"
+      - "2306:2306/udp"
     volumes:
       - './missions:/arma3/mpmissions'
       - './configs:/arma3/configs'
@@ -23,3 +29,9 @@ services:
       - './steamapp:/arma3/steamapps/workshop/content/107410'
     env_file: .env
     restart: unless-stopped
+#    networks:
+#      - arma3net
+#
+#networks:
+#  arma3net:
+#    name: arma3net
