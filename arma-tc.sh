@@ -17,6 +17,7 @@ get_bridge_interface() {
         echo "docker0"
     fi
 }
+echo "Traffic control disabled for $CONTAINER_NAME, IP: $IP on interface $INTERFACE"
 
 while true; do
     if docker ps --format '{{.Names}}' | grep -q "^$CONTAINER_NAME$"; then

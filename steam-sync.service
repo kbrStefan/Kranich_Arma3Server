@@ -1,0 +1,11 @@
+[Unit]
+Description=Utilizing steamclient to pull workshop content
+After=network.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+User=arma
+Group=arma
+ExecStart=/home/arma/Kranich_Arma3Server/run_steam_sync.sh start
+ExecStop=/home/arma/Kranich_Arma3Server/run_steam_sync.sh stop

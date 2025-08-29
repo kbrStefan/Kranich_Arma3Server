@@ -26,7 +26,7 @@ services:
       - './heli:/arma3/heli'
       - './jets:/arma3/jets'
       - './orange:/arma3/orange'
-      - './steamapp:/arma3/steamapps/workshop/content/107410'
+      - './steamapp:/arma3/steamapps'
     env_file: .env
     restart: unless-stopped
 #    networks:

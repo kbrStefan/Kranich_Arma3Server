@@ -126,14 +126,16 @@ def preset(mod_file):
                 missing_mods = list(set(missing_mods))
                 missing_mods = [mod for mod in missing_mods if mod not in clientside_mods]
                 skipped_mods = [mod for mod in mods if mod not in missing_mods]
-                print(f"\033[33mForced download of {len(missing_mods)} missing / broken mods: {missing_mods}\033[0m", flush=True)
-                print(f"\033[92mSkipping download of {len(skipped_mods)}mods: {skipped_mods}\033[0m", flush=True)
-                download(missing_mods)
+                print(f"\033[33m{len(missing_mods)} missing / broken mods: {missing_mods}\033[0m", flush=True)
+                print(f"\033[92mFound {len(skipped_mods)}mods: {skipped_mods}\033[0m", flush=True)
+                # Do not download mods as we let steam client do that
+                #download(missing_mods)
         # After successful download, recursively lowercase all files and folders
         # and copy keys
         for moddir in moddirs:
-            new_mod_path = recursive_lowercase(moddir)
-            print(f"Recursively lowercased {moddir} to {new_mod_path}", flush=True)
+            # do not lowercase mods as we mount it with ciopfs
+            # new_mod_path = recursive_lowercase(moddir)
+            # print(f"Recursively lowercased {moddir} to {new_mod_path}", flush=True)
             keys.copy(moddir)
         # Strip all clientside mods from the load list
         moddirs = [moddir for moddir in moddirs if os.path.basename(moddir) not in clientside_mods]

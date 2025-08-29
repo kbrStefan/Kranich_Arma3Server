@@ -15,6 +15,7 @@ def copy(moddir):
     if len(keys) > 0:
         for key in keys:
             if not os.path.isdir(key):
+                print("Installing key:", key)
                 shutil.copy2(key, "/arma3/keys")
     else:
         print("Missing keys:", moddir)

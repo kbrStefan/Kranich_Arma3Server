@@ -71,7 +71,7 @@ EXPOSE 2305/udp
 EXPOSE 2306/udp
 
 WORKDIR /arma3
-RUN mkdir -p /arma3/steamapps/workshop/content/107410
+#RUN mkdir -p /arma3/steamapps/workshop/content/107410
 
 #VOLUME /arma3/addons
 #VOLUME /arma3/enoch
