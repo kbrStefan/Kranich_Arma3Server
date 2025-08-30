@@ -8,8 +8,9 @@ Custom modification:
 - default container user is now non-root `arma` instead of `root`
 - volume for workshop downloads added
 - added (template) systemd service and companion `run_arma_server.sh` to run the container as non root, non docker user.
-- workshop mods are loaded batches of 3 to improve stability
-- downloaded folders are auto conveted to lower-case before installation of keys
+- Download of the workshop mods is now expected to be done by steamClient.
+  Therefore the service `steam-sync.service/run_steam_sync.sh` can be used.
+  steamClient is expected to be installed.
 
 ## Usage
 

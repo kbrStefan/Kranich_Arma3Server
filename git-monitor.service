@@ -1,0 +1,7 @@
+[Unit]
+Description=Monitor Git Repo and Restart Arma 3 Server on Changes
+
+[Service]
+Type=oneshot
+User=arma
+ExecStart=/home/arma/Kranich_Arma3Server/git-monitor.sh

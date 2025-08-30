@@ -1,0 +1,9 @@
+[Unit]
+Description=Run git-monitor every 1 minutes
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=1min
+
+[Install]
+WantedBy=timers.target
