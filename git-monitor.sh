@@ -21,8 +21,11 @@ REMOTE=$(git rev-parse @{u})
 if [ "$LOCAL" != "$REMOTE" ]; then
     echo "New changes detected, pulling and restarting server..."
     if git pull; then
-        sudo systemctl restart arma-server.service
-    else
+        if systemctl is-active --quiet arma-server.service; then
+            sudo systemctl restart arma-server.service
+        else
+            echo "arma-server.service is not running, skipping restart."
+        fi
         echo "git pull failed, aborting restart."
         exit 1
     fi
