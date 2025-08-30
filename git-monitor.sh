@@ -5,7 +5,10 @@ cd "${KRANICH_FOLDER}"
 
 
 # Fetch latest changes
-git fetch
+if ! git fetch; then
+    echo "git fetch failed, aborting."
+    exit 1
+fi
 
 # Check if there are new commits
 LOCAL=$(git rev-parse @)
@@ -14,5 +17,5 @@ REMOTE=$(git rev-parse @{u})
 if [ "$LOCAL" != "$REMOTE" ]; then
     echo "New changes detected, pulling and restarting server..."
     git pull
-    systemctl restart arma-server.service
+    sudo systemctl restart arma3server.service
 fi
