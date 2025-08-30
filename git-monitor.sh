@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Notes for user arma allowed to restart the arma-server service without password:
+# Add the following line to /etc/sudoers using visudo:
+# arma ALL=NOPASSWD: /bin/systemctl restart arma-server.service
+
 KRANICH_FOLDER=$(dirname "$0")
 cd "${KRANICH_FOLDER}"
 
@@ -16,6 +20,10 @@ REMOTE=$(git rev-parse @{u})
 
 if [ "$LOCAL" != "$REMOTE" ]; then
     echo "New changes detected, pulling and restarting server..."
-    git pull
-    sudo -u systemctl restart arma-server.service
+    if git pull; then
+        sudo systemctl restart arma-server.service
+    else
+        echo "git pull failed, aborting restart."
+        exit 1
+    fi
 fi
