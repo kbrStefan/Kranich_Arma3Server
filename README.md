@@ -10,7 +10,8 @@ Custom modification:
 - added (template) systemd service and companion `run_arma_server.sh` to run the container as non root, non docker user.
 - Download of the workshop mods is now expected to be done by steamClient.
   Therefore the service `steam-sync.service/run_steam_sync.sh` can be used.
-  steamClient is expected to be installed.
+  steamClient is expected to be installed.#
+- Monitoring service for restart of server when git repo changed
 
 ## Usage
 
