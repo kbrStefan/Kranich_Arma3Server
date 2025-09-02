@@ -28,7 +28,7 @@ services:
       - './orange:/arma3/orange'
       - './steamapp:/arma3/steamapps'
     env_file: .env
-    restart: unless-stopped
+    restart: no
 #    networks:
 #      - arma3net
 #
