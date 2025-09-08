@@ -7,7 +7,6 @@
 KRANICH_FOLDER=$(dirname "$0")
 cd "${KRANICH_FOLDER}"
 
-
 # Fetch latest changes
 if ! git fetch; then
     echo "git fetch failed, aborting."
@@ -17,15 +16,17 @@ fi
 # Check if there are new commits
 LOCAL=$(git rev-parse @)
 REMOTE=$(git rev-parse @{u})
-
+#echo "$LOCAL vs. $REMOTE"
 if [ "$LOCAL" != "$REMOTE" ]; then
     echo "New changes detected, pulling and restarting server..."
     if git pull; then
         if systemctl is-active --quiet arma-server.service; then
+            echo "Restarting arma-service.service now!"
             sudo systemctl restart arma-server.service
         else
             echo "arma-server.service is not running, skipping restart."
         fi
+    else
         echo "git pull failed, aborting restart."
         exit 1
     fi
