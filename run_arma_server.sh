@@ -18,7 +18,7 @@ case "$1" in
     git pull
     if [ -d "$TS_SERVER_FOLDER" ]; then
       echo "Starting Teamspeak 3 server..."
-      ${TS_SERVER_FOLDER}/ts3server_minimal_runscript.sh
+      ${TS_SERVER_FOLDER}/ts3server_minimal_runscript.sh &
     fi
     echo "Starting container..."
     docker compose up --build -d
@@ -26,7 +26,7 @@ case "$1" in
   stop)
     if [ -d "$TS_SERVER_FOLDER" ]; then
       echo "Stopping Teamspeak 3 server..."
-      ${TS_SERVER_FOLDER}/ts3server_startscript.sh stop
+      ${TS_SERVER_FOLDER}/ts3server_startscript.sh stop &
     fi
     echo "Stopping container..."
     docker compose stop
