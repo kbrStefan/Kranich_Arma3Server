@@ -1,0 +1,11 @@
+[Unit]
+Description=Teamspeak 3 Server
+After=network.target arma-server.service
+
+[Service]
+Type=simple
+User=arma
+Group=arma
+ExecStart=/home/arma/teamspeak/ts3server_minimal_runscript.sh
+Restart=always
+RestartSec=5
